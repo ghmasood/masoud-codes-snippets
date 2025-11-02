@@ -4,9 +4,30 @@ export default function ThemeToggle() {
   const [theme, setTheme] = useState('light');
 
   useEffect(() => {
-    const saved = localStorage.getItem('theme') || 'light';
-    setTheme(saved);
-    document.documentElement.dataset.theme = saved;
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme) {
+      setTheme(savedTheme);
+      document.documentElement.dataset.theme = savedTheme;
+    } else {
+      const prefersDark = window.matchMedia(
+        '(prefers-color-scheme: dark)'
+      ).matches;
+      const systemTheme = prefersDark ? 'dark' : 'light';
+      setTheme(systemTheme);
+      document.documentElement.dataset.theme = systemTheme;
+    }
+
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleSystemChange = (e: MediaQueryListEvent) => {
+      if (!localStorage.getItem('theme')) {
+        const newSystemTheme = e.matches ? 'dark' : 'light';
+        setTheme(newSystemTheme);
+        document.documentElement.dataset.theme = newSystemTheme;
+      }
+    };
+
+    mediaQuery.addEventListener('change', handleSystemChange);
+    return () => mediaQuery.removeEventListener('change', handleSystemChange);
   }, []);
 
   const toggleTheme = () => {
@@ -17,7 +38,7 @@ export default function ThemeToggle() {
   };
 
   return (
-    <button onClick={toggleTheme} className='p-2 rounded-md border'>
+    <button onClick={toggleTheme}>
       {theme === 'dark' ? '🌙 Dark' : '☀️ Light'}
     </button>
   );

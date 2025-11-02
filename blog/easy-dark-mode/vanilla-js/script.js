@@ -1,9 +1,28 @@
-const toggleTheme = () => {
-  const currentTheme = document.documentElement.dataset.theme;
-  const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-  document.documentElement.dataset.theme = newTheme;
-  localStorage.setItem('theme', newTheme);
-};
+const root = document.documentElement;
+const toggleBtn = document.getElementById('theme-toggle');
 
-const saved = localStorage.getItem('theme') || 'light';
-document.documentElement.dataset.theme = saved;
+const savedTheme = localStorage.getItem('theme');
+
+if (savedTheme) {
+  root.dataset.theme = savedTheme;
+} else {
+  root.dataset.theme = window.matchMedia('(prefers-color-scheme: dark)').matches
+    ? 'dark'
+    : 'light';
+}
+
+window
+  .matchMedia('(prefers-color-scheme: dark)')
+  .addEventListener('change', (e) => {
+    const systemTheme = e.matches ? 'dark' : 'light';
+    const savedTheme = localStorage.getItem('theme');
+
+    if (!savedTheme) {
+      document.documentElement.dataset.theme = systemTheme;
+    }
+  });
+toggleBtn.addEventListener('click', () => {
+  const newTheme = root.dataset.theme === 'dark' ? 'light' : 'dark';
+  root.dataset.theme = newTheme;
+  localStorage.setItem('theme', newTheme);
+});
